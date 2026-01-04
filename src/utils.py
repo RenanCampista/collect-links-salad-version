@@ -53,47 +53,58 @@ def format_posts(posts: list[dict]) -> list[dict]:
         body_data = post['postHistory'][0].get('body', {})
         metadata = post['postHistory'][0].get('metadata', {})
         
+        # Extrair timestamp (pode vir como dict do MongoDB com "$date")
+        timestamp = body_data.get('timestamp', '')
+        if isinstance(timestamp, dict) and '$date' in timestamp:
+            timestamp = timestamp['$date']
+        
+        # Extrair media (converter lista de dicts para string se necessário)
+        media = body_data.get('media', '')
+        if isinstance(media, list) and len(media) > 0:
+            # Manter como lista se a API aceitar, ou converter para string separada por vírgula
+            media = media  # A API espera lista ou string
+        
         formatted_post = {
             "body": {
-                "postShortcode": post.get('postShortcode', ''),
+                "postShortcode": post.get('postShortcode', '').replace('@', ''),
                 "name": body_data.get('authorName', ''),
-                "time": body_data.get('timestamp', ''),
-                "likes": metadata.get('stats', {}).get('like', 0),
+                "time": timestamp,
+                "likes": int(metadata.get('stats', {}).get('like', 0)),
                 "message": body_data.get('text', ''),
                 "profileId": body_data.get('authorId', ''),
                 "commentId": "",
                 "username": body_data.get('authorNickName', ''),
                 "parentCommentId": "",
                 "replies": "",
-                "reply": body_data.get('reply', False),
+                "reply": "",
                 "shortcode": post.get('postShortcode', ''),
                 "reaction": "",
-                "isVideo": body_data.get('isVideo', False),
-                "comments": metadata.get('stats', {}).get('comment', 0),
+                "isVideo": body_data.get('isVideo', ''),
+                "comments": int(metadata.get('stats', {}).get('comment', 0)),
                 "url": body_data.get('postUrl', ''),
                 "profileUrl": body_data.get('authorUrl', ''),
-                "videoViewCount": metadata.get('stats', {}).get('seen', 0),
+                "videoViewCount": int(metadata.get('stats', {}).get('seen', 0)),
                 "isPrivateUser": "",
                 "isVerifiedUser": "",
                 "displayUrl": "",
                 "followersCount": "",
-                "id": post.get('postId', ''),
+                "id": int(post.get('postId', 0)) if post.get('postId', '').isdigit() else 0,
                 "caption": "",
                 "thumbnail": "",
                 "accessibilityCaption": "",
                 "commentsDisabled": "",
                 "videoDuration": "",
-                "isSponsored": body_data.get('isSponsored', False),
+                "isSponsored": body_data.get('isSponsored', ''),
                 "locationName": body_data.get('locationName', ''),
                 "mediaCount": "",
-                "media": body_data.get('media', []),
+                "media": media,
                 "owner": "",
                 "profileImage": body_data.get('authorImage', ''),
-                "terms": post.get('terms', [])
+                "terms": ""
             },
             "metadata": {
                 "theme": metadata.get('collect', {}).get('theme'),
-                "terms": post.get('terms', []),
+                "terms": [],
                 "project": "uncategorized",
                 "api_version": metadata.get('collect', {}).get('apiVersion', 'painel-ContentLibrary')
             }
@@ -101,4 +112,5 @@ def format_posts(posts: list[dict]) -> list[dict]:
         formatted_posts.append(formatted_post)
     
     return formatted_posts
+
 

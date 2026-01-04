@@ -68,11 +68,11 @@ class InstagramLinkFetcher:
                         posts_data[idx]['postHistory'][0]['body']['postUrl'] = match_info['url']
                         posts_data[idx]['postShortcode'] = post_short_code(match_info['url'])
                         found_count += 1
-                        self.log.info(f"  ✓ Post encontrado (linha {idx + 2})")
+                        self.log.info(f"  ✓ Post encontrado (linha {idx + 1})")
                         
                         self.log.debug(f"melhor score: {match_info['score']:.2f}) -> {match_info['url']}")
                     else:
-                        self.log.info(f"  ✗ Post não encontrado (linha {idx + 2})")
+                        self.log.info(f"  ✗ Post não encontrado (linha {idx + 1})")
                         
                         self.log.debug(f"melhor score: {match_info['score']:.2f}) -> nenhum link")    
                              
