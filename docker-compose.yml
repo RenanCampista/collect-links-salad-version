@@ -4,6 +4,4 @@ services:
     environment:
       - API_BASE_URL=${API_BASE_URL}
       - SECRET_TOKEN=${SECRET_TOKEN}
-    volumes:
-      - ./logs:/app/logs
     restart: unless-stopped
