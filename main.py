@@ -39,11 +39,17 @@ def main():
     configs = load_env_variables()
     api_client = ApiDbClient(configs["API_BASE_URL"], configs["SECRET_TOKEN"], log)
     ig_fetcher = InstagramLinkFetcher(log)
+    counter = 0
     
     while True:
         response = api_client.get_posts("instagram/coleta_links/get")
+
         if not response:
             log.info("Nenhum post para processar. Aguardando 2 minutos...")
+            counter += 1
+            if counter >= 5:
+                log.info("Nenhum post processado por 10 minutos. Reiniciando o coletor...")
+                handle_rate_limit_restart()
             time.sleep(120)
             continue
         

@@ -6,7 +6,7 @@ set -e
 
 DOCKER_USERNAME="renan2002"
 IMAGE_NAME="instagram-link-collector"
-VERSION="1.1.1"
+VERSION="1.1.2"
 FULL_IMAGE_NAME="${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}"
 
 echo "Construindo imagem Docker: $FULL_IMAGE_NAME"
