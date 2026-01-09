@@ -2,10 +2,9 @@ import time
 import logging
 from dotenv import load_dotenv
 import os
-import sys
 
 from src.api_db_client import ApiDbClient
-from src.utils import setup_logging, format_posts
+from src.utils import setup_logging, format_posts, handle_rate_limit_restart
 from src.instagram_link_fetcher import InstagramLinkFetcher
 
 
@@ -19,11 +18,6 @@ def load_env_variables() -> dict:
         "SECRET_TOKEN": os.getenv("SECRET_TOKEN"),
     }
     return config
-
-
-def handle_rate_limit_restart():
-    """Reinicia o container quando atinge rate limits."""
-    sys.exit(2) # restart container
 
 
 def delete_processed_posts(api_client: ApiDbClient, posts: list[dict], log: logging.Logger):

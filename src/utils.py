@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 import unicodedata
 import re
+import sys
+
 
 def setup_logging(log_dir: str, log_name: str) -> logging.Logger:
     """Configures logging with daily log files."""
@@ -103,10 +105,10 @@ def format_posts(posts: list[dict]) -> list[dict]:
                 "terms": ""
             },
             "metadata": {
-                "theme": metadata.get('collect', {}).get('theme'),
+                "theme": "",
                 "terms": [],
                 "project": "uncategorized",
-                "api_version": metadata.get('collect', {}).get('apiVersion', 'painel-ContentLibrary')
+                "api_version": "painel-ContentLibrary"
             }
         }
         formatted_posts.append(formatted_post)
@@ -114,3 +116,6 @@ def format_posts(posts: list[dict]) -> list[dict]:
     return formatted_posts
 
 
+def handle_rate_limit_restart():
+    """Reinicia o container quando atinge rate limits."""
+    sys.exit(2) # restart container

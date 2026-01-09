@@ -1,6 +1,6 @@
 import requests
 import logging
-
+from .utils import handle_rate_limit_restart
 
 class ApiDbClient:
     """Client to interact with a REST API using a secret token for authentication."""
@@ -35,6 +35,7 @@ class ApiDbClient:
                 return False
         except requests.exceptions.Timeout:
             self.log.error(f"Timeout ao enviar os dados. A API demorou mais de 5 minutos para responder.")
+            handle_rate_limit_restart()
             return False
         except Exception as e:
             self.log.error(f"Erro ao enviar os dados: {e}")
