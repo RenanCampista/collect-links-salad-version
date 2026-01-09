@@ -31,7 +31,6 @@ class InstagramLinkFetcher:
     def search_links(self, posts_data: list[dict], username: str, max_retries: int = 3) -> tuple[list[dict], bool]:
         
         retries = 0
-        rate_limited = False
         while retries < max_retries:
             try:
                 # Redireciona stderr temporariamente para suprimir mensagens do Instaloader
@@ -78,16 +77,15 @@ class InstagramLinkFetcher:
                              
                 self.log.info(f"Resultado: {found_count}/{len(posts_data)} posts encontrados\n")
                 
-                return posts_data, rate_limited
+                return posts_data, False
             except Exception as e:
                 captured_output = ""
                 if self.check_rate_limit_in_output(e, captured_output):
                     self.log.warning(f"Rate limit atingido ao acessar o perfil '{username}'. Tentando novamente após espera.")
                     retries += 1
-                    rate_limited = True
                     continue
                 else:
                     self.log.error(f"Erro ao acessar o perfil '{username}': {e}")
-                    return [], rate_limited
+                    return [], True
                 
-        return [], rate_limited
+        return [], True

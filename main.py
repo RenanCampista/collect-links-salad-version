@@ -49,11 +49,14 @@ def main():
         
         log.info(f"Processando {response.get('total', 0)} posts de @{response.get('username', '')}")
         
-        updated_posts, rl = ig_fetcher.search_links(
+        updated_posts, rate_limit = ig_fetcher.search_links(
             posts_data=response.get('result', []),
             username=response.get('username', ''), 
             max_retries=3   
         )
+        
+        if rate_limit:
+            handle_rate_limit_restart()
         
         formatted_posts = format_posts(updated_posts)
         
@@ -62,9 +65,6 @@ def main():
             log.info("Posts atualizados enviados com sucesso para a API.")
         else:
             log.error("Erro ao enviar posts atualizados para a API.")
-        
-        if rl:
-            handle_rate_limit_restart()
             
             
 if __name__ == "__main__":
