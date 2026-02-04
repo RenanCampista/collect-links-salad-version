@@ -1,6 +1,7 @@
 import io
 import logging
 import contextlib
+import time
 from difflib import SequenceMatcher
 from itertools import islice
 from .utils import clean_text, post_short_code
@@ -28,7 +29,14 @@ class InstagramLinkFetcher:
         full_text = str(error_message).lower() + " " + captured_output.lower()
         return any(indicator.lower() in full_text for indicator in rate_limit_indicators)
 
-    def search_links(self, posts_data: list[dict], username: str, max_retries: int = 3) -> tuple[list[dict], bool]:
+    def search_links(
+            self, 
+            posts_data: list[dict], 
+            username: str, 
+            max_retries: int = 3, 
+            timeout_seconds: int = 30
+        ) -> tuple[list[dict], bool]:
+        """Busca links nos posts do perfil; interrompe a busca após `timeout_seconds` e processa resultados parciais."""
         
         retries = 0
         while retries < max_retries:
@@ -42,18 +50,25 @@ class InstagramLinkFetcher:
                 for idx, post_data in enumerate(posts_data):
                     best_matches[idx] = {'url': None, 'score': 0.0}
                     
+                # Itera pelos posts do perfil; interrompe se o timeout for atingido.
+                start_time = time.time()
                 with contextlib.redirect_stderr(io.StringIO()):
-                    for post in islice(profile.get_posts(), 50):
+                    for post in islice(profile.get_posts(), 30):
+                        # Verifica timeout
+                        if time.time() - start_time > timeout_seconds:
+                            self.log.warning(f"Timeout de {timeout_seconds}s atingido ao buscar posts; processando resultados parciais.")
+                            break
+
                         if post.caption:
                             post_caption_clean = clean_text(post.caption)[:200]
                             post_url = f'https://www.instagram.com/p/{post.shortcode}/'
-                            
+
                             # Comparar com todos os posts que estamos procurando
                             for idx, post_data in enumerate(posts_data):
                                 post_text = post_data['postHistory'][0]['body']['text'] if post_data['postHistory'] else ''
                                 post_text_clean = clean_text(post_text)[:200]
                                 score = SequenceMatcher(None, post_caption_clean, post_text_clean).ratio()
-                                
+
                                 # Se encontrou um match melhor, atualizar
                                 if score > best_matches[idx]['score']:
                                     best_matches[idx]['score'] = score
