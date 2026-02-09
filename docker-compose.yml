@@ -4,4 +4,5 @@ services:
     environment:
       - API_BASE_URL=${API_BASE_URL}
       - SECRET_TOKEN=${SECRET_TOKEN}
-    restart: unless-stopped
+    command: sh -c "timeout 15m python3 main.py"
+    restart: "no"

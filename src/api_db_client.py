@@ -47,7 +47,7 @@ class ApiDbClient:
             response = requests.get(
                 url=f"{self.base}/{route}", 
                 headers=self.headers, 
-                timeout=30000
+                timeout=25000 # 25 seconds
             )
             if response.status_code == 200:
                 return response.json()

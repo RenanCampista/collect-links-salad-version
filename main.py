@@ -41,10 +41,10 @@ def main():
         if not response:
             log.info("Nenhum post para processar. Aguardando 2 minutos...")
             counter += 1
-            if counter >= 5:
+            if counter >= 2:
                 log.info("Nenhum post processado por 10 minutos. Reiniciando o coletor...")
                 handle_rate_limit_restart()
-            time.sleep(120)
+            time.sleep(20)
             continue
         
         log.info(f"Processando {response.get('total', 0)} posts de @{response.get('username', '')}")
