@@ -40,10 +40,11 @@ class InstagramLinkFetcher:
         
         retries = 0
         while retries < max_retries:
+            self.log.info(f"Buscando links para @{username} (tentativa {retries + 1}/{max_retries})...")
             try:
                 # Redireciona stderr temporariamente para suprimir mensagens do Instaloader
-                with contextlib.redirect_stderr(io.StringIO()):
-                    profile = instaloader.Profile.from_username(self.loader.context, username)
+                #with contextlib.redirect_stderr(io.StringIO()):
+                profile = instaloader.Profile.from_username(self.loader.context, username)
                     
                 # Para cada post que queremos encontrar, armazenar melhor match
                 best_matches = {}
@@ -52,27 +53,27 @@ class InstagramLinkFetcher:
                     
                 # Itera pelos posts do perfil; interrompe se o timeout for atingido.
                 start_time = time.time()
-                with contextlib.redirect_stderr(io.StringIO()):
-                    for post in islice(profile.get_posts(), 30):
-                        # Verifica timeout
-                        if time.time() - start_time > timeout_seconds:
-                            self.log.warning(f"Timeout de {timeout_seconds}s atingido ao buscar posts; processando resultados parciais.")
-                            break
+                #with contextlib.redirect_stderr(io.StringIO()):
+                for post in islice(profile.get_posts(), 30):
+                    # Verifica timeout
+                    if time.time() - start_time > timeout_seconds:
+                        self.log.warning(f"Timeout de {timeout_seconds}s atingido ao buscar posts; processando resultados parciais.")
+                        break
 
-                        if post.caption:
-                            post_caption_clean = clean_text(post.caption)[:200]
-                            post_url = f'https://www.instagram.com/p/{post.shortcode}/'
+                    if post.caption:
+                        post_caption_clean = clean_text(post.caption)[:200]
+                        post_url = f'https://www.instagram.com/p/{post.shortcode}/'
 
-                            # Comparar com todos os posts que estamos procurando
-                            for idx, post_data in enumerate(posts_data):
-                                post_text = post_data['postHistory'][0]['body']['text'] if post_data['postHistory'] else ''
-                                post_text_clean = clean_text(post_text)[:200]
-                                score = SequenceMatcher(None, post_caption_clean, post_text_clean).ratio()
+                        # Comparar com todos os posts que estamos procurando
+                        for idx, post_data in enumerate(posts_data):
+                            post_text = post_data['postHistory'][0]['body']['text'] if post_data['postHistory'] else ''
+                            post_text_clean = clean_text(post_text)[:200]
+                            score = SequenceMatcher(None, post_caption_clean, post_text_clean).ratio()
 
-                                # Se encontrou um match melhor, atualizar
-                                if score > best_matches[idx]['score']:
-                                    best_matches[idx]['score'] = score
-                                    best_matches[idx]['url'] = post_url
+                            # Se encontrou um match melhor, atualizar
+                            if score > best_matches[idx]['score']:
+                                best_matches[idx]['score'] = score
+                                best_matches[idx]['url'] = post_url
                                     
                 # Processar resultados
                 found_count = 0

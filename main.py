@@ -42,7 +42,7 @@ def main():
             log.info("Nenhum post para processar. Aguardando 2 minutos...")
             counter += 1
             if counter >= 2:
-                log.info("Nenhum post processado por 10 minutos. Reiniciando o coletor...")
+                log.info("Nenhum post processado por 4 minutos. Reiniciando processo para evitar possíveis bloqueios.")
                 handle_rate_limit_restart()
             time.sleep(20)
             continue
