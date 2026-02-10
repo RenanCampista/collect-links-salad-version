@@ -5,15 +5,30 @@ import time
 from difflib import SequenceMatcher
 from itertools import islice
 from .utils import clean_text, post_short_code
+import sys
 
 import instaloader
-from instaloader import Instaloader
+from instaloader import Instaloader, RateController, InstaloaderContext
+
+class RateLimitController(RateController):
+    """Controlador personalizado para lidar com rate limits do Instagram."""
+    def __init__(self, context: InstaloaderContext):
+        super().__init__(context)
+        self.logger = logging.getLogger(__name__)
+    
+
+    def handle_429(self, query_type):
+        self.logger.warning(f"Rate limit atingido (HTTP 429) ao acessar '{query_type}'")
+        # TODO Fazer o tratamento adequado
+        #sys.exit(2)
 
 
 class InstagramLinkFetcher:
     """"Classe para coletar dados de perfis do Instagram usando Instaloader."""
     def __init__(self, logger: logging.Logger):
-        self.loader = Instaloader()
+        self.loader = Instaloader(
+            rate_controller=lambda ctx: RateLimitController(ctx)
+        )
         self.loader.context.sleep = True
         self.log = logger
     
